@@ -413,13 +413,12 @@ def update_kedro_req(context: behave.runner.Context):
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text().splitlines()
-        new_reqs = []
-        for req in old_reqs:
-            if req.startswith("kedro") and Requirement(req).name.lower() == "kedro":
-                # Do not include kedro as it's preinstalled in the environment
-                pass
-            else:
-                new_reqs.append(req)
+        new_reqs = [
+            req
+            for req in old_reqs
+            if not req.startswith("kedro")
+            or Requirement(req).name.lower() != "kedro"
+        ]
         new_reqs = "\n".join(new_reqs)
         assert old_reqs != new_reqs
         reqs_path.write_text(new_reqs)
@@ -429,7 +428,7 @@ def update_kedro_req(context: behave.runner.Context):
 def add_req(context: behave.runner.Context, dependency: str):
     reqs_path = context.root_project_dir / "src" / "requirements.txt"
     if reqs_path.is_file():
-        reqs_path.write_text(reqs_path.read_text() + "\n" + str(dependency) + "\n")
+        reqs_path.write_text(reqs_path.read_text() + "\n" + dependency + "\n")
 
 
 @then("CLI should print the version in an expected format")

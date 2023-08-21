@@ -64,8 +64,7 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
 
     result = {}
     for pipe in target_pipelines:
-        pl_obj = pipelines.get(pipe)
-        if pl_obj:
+        if pl_obj := pipelines.get(pipe):
             pipeline_ds = pl_obj.data_sets()
         else:
             existing_pls = ", ".join(sorted(pipelines.keys()))
@@ -80,10 +79,9 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
         # resolve any factory datasets in the pipeline
         factory_ds_by_type = defaultdict(list)
         for ds_name in default_ds:
-            matched_pattern = data_catalog._match_pattern(
+            if matched_pattern := data_catalog._match_pattern(
                 data_catalog._dataset_patterns, ds_name
-            )
-            if matched_pattern:
+            ):
                 ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
                 factory_ds_by_type[ds_config["type"]].append(ds_name)
 
@@ -163,9 +161,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
         if not ds_name.startswith("params:") and ds_name != "parameters"
     }
 
-    # Datasets that are missing in Data Catalog
-    missing_ds = sorted(pipe_datasets - catalog_datasets)
-    if missing_ds:
+    if missing_ds := sorted(pipe_datasets - catalog_datasets):
         catalog_path = (
             context.project_path
             / settings.CONF_SOURCE
@@ -202,8 +198,7 @@ def rank_catalog_factories(metadata: ProjectMetadata, env):
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    catalog_factories = context.catalog._dataset_patterns
-    if catalog_factories:
+    if catalog_factories := context.catalog._dataset_patterns:
         click.echo(yaml.dump(list(catalog_factories.keys())))
     else:
         click.echo("There are no dataset factories in the catalog.")
@@ -231,8 +226,7 @@ def resolve_patterns(metadata: ProjectMetadata, env):
     datasets = set()
 
     for pipe in target_pipelines:
-        pl_obj = pipelines.get(pipe)
-        if pl_obj:
+        if pl_obj := pipelines.get(pipe):
             datasets.update(pl_obj.data_sets())
 
     for ds_name in datasets:
@@ -240,13 +234,12 @@ def resolve_patterns(metadata: ProjectMetadata, env):
         if ds_name in explicit_datasets or is_param:
             continue
 
-        matched_pattern = data_catalog._match_pattern(
+        if matched_pattern := data_catalog._match_pattern(
             data_catalog._dataset_patterns, ds_name
-        )
-        if matched_pattern:
+        ):
             ds_config = data_catalog._resolve_config(ds_name, matched_pattern)
             ds_config["filepath"] = _trim_filepath(
-                str(context.project_path) + "/", ds_config["filepath"]
+                f"{str(context.project_path)}/", ds_config["filepath"]
             )
             explicit_datasets[ds_name] = ds_config
 

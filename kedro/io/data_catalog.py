@@ -123,11 +123,11 @@ class _FrozenDatasets:
 
     # Don't allow users to add/change attributes on the fly
     def __setattr__(self, key, value):
-        msg = "Operation not allowed! "
-        if key in self.__dict__:
-            msg += "Please change datasets through configuration."
-        else:
-            msg += "Please use DataCatalog.add() instead."
+        msg = "Operation not allowed! " + (
+            "Please change datasets through configuration."
+            if key in self.__dict__
+            else "Please use DataCatalog.add() instead."
+        )
         raise AttributeError(msg)
 
 
@@ -301,12 +301,11 @@ class DataCatalog:
                 )
         dataset_layers = layers or None
         sorted_patterns = cls._sort_patterns(dataset_patterns)
-        missing_keys = [
+        if missing_keys := [
             key
             for key in load_versions.keys()
             if not (key in catalog or cls._match_pattern(sorted_patterns, key))
-        ]
-        if missing_keys:
+        ]:
             raise DatasetNotFoundError(
                 f"'load_versions' keys [{', '.join(sorted(missing_keys))}] "
                 f"are not found in the catalog."
@@ -378,8 +377,7 @@ class DataCatalog:
             # If the dataset is a patterned dataset, materialise it and add it to
             # the catalog
             data_set_config = self._resolve_config(data_set_name, matched_pattern)
-            ds_layer = data_set_config.pop("layer", None)
-            if ds_layer:
+            if ds_layer := data_set_config.pop("layer", None):
                 self.layers = self.layers or {}
                 self.layers.setdefault(ds_layer, set()).add(data_set_name)
             data_set = AbstractDataset.from_config(
@@ -403,10 +401,9 @@ class DataCatalog:
             # Flag to turn on/off fuzzy-matching which can be time consuming and
             # slow down plugins like `kedro-viz`
             if suggest:
-                matches = difflib.get_close_matches(
+                if matches := difflib.get_close_matches(
                     data_set_name, self._data_sets.keys()
-                )
-                if matches:
+                ):
                     suggestions = ", ".join(matches)
                     error_msg += f" - did you mean one of these instead: {suggestions}"
             raise DatasetNotFoundError(error_msg)
@@ -421,9 +418,7 @@ class DataCatalog:
     def __contains__(self, data_set_name):
         """Check if an item is in the catalog as a materialised dataset or pattern"""
         matched_pattern = self._match_pattern(self._dataset_patterns, data_set_name)
-        if data_set_name in self._data_sets or matched_pattern:
-            return True
-        return False
+        return bool(data_set_name in self._data_sets or matched_pattern)
 
     def _resolve_config(
         self,
@@ -482,9 +477,7 @@ class DataCatalog:
             "Loading data from '%s' (%s)...", name, type(dataset).__name__
         )
 
-        result = dataset.load()
-
-        return result
+        return dataset.load()
 
     def save(self, name: str, data: Any) -> None:
         """Save data to a registered data set.

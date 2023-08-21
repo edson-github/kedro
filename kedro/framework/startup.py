@@ -89,8 +89,9 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
         ) from exc
 
     mandatory_keys = ["package_name", "project_name"]
-    missing_keys = [key for key in mandatory_keys if key not in metadata_dict]
-    if missing_keys:
+    if missing_keys := [
+        key for key in mandatory_keys if key not in metadata_dict
+    ]:
         raise RuntimeError(f"Missing required keys {missing_keys} from '{_PYPROJECT}'.")
 
     # Temporary solution to keep project_version backwards compatible to be removed in 0.19.0

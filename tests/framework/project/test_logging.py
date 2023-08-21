@@ -11,16 +11,18 @@ from kedro.framework.project import LOGGING, configure_logging
 
 @pytest.fixture
 def default_logging_config():
-    logging_config = {
+    return {
         "version": 1,
         "disable_existing_loggers": False,
         "handlers": {
-            "rich": {"class": "kedro.logging.RichHandler", "rich_tracebacks": True}
+            "rich": {
+                "class": "kedro.logging.RichHandler",
+                "rich_tracebacks": True,
+            }
         },
         "loggers": {"kedro": {"level": "INFO"}},
         "root": {"handlers": ["rich"]},
     }
-    return logging_config
 
 
 @pytest.fixture(autouse=True)

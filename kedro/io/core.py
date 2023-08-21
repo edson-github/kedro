@@ -688,8 +688,7 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
 
     path = parsed_path.path
     if protocol == "file":
-        windows_path = re.match(r"^/([a-zA-Z])[:|]([\\/].*)$", path)
-        if windows_path:
+        if windows_path := re.match(r"^/([a-zA-Z])[:|]([\\/].*)$", path):
             path = ":".join(windows_path.groups())
 
     options = {"protocol": protocol, "path": path}
@@ -701,7 +700,7 @@ def _parse_filepath(filepath: str) -> dict[str, str]:
         # Azure Data Lake Storage Gen2 URIs can store the container name in the
         # 'username' field of a URL (@ syntax), so we need to add it to the path
         if protocol == "abfss" and parsed_path.username:
-            options["path"] = parsed_path.username + "@" + options["path"]
+            options["path"] = f"{parsed_path.username}@" + options["path"]
 
     return options
 

@@ -61,8 +61,7 @@ def wait_for(
     end = time() + timeout_
     while time() <= end:
         try:
-            result = func(**kwargs)
-            return result
+            return func(**kwargs)
         except Exception as err:  # pylint: disable=broad-except
             if print_error:
                 print(err)

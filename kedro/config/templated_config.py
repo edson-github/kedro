@@ -2,6 +2,7 @@
 or more configuration files from specified paths, and format template strings
 with the values from the passed dictionary.
 """
+
 from __future__ import annotations
 
 import re
@@ -22,7 +23,7 @@ IDENTIFIER_PATTERN = re.compile(
     re.VERBOSE,
 )
 FULL_STRING_IDENTIFIER_PATTERN = re.compile(
-    r"^" + IDENTIFIER_PATTERN.pattern + r"$", re.VERBOSE
+    f"^{IDENTIFIER_PATTERN.pattern}$", re.VERBOSE
 )
 
 
@@ -126,7 +127,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
             "logging": ["logging*", "logging*/**", "**/logging*"],
         }
-        self.config_patterns.update(config_patterns or {})
+        self.config_patterns |= (config_patterns or {})
 
         super().__init__(
             conf_source=conf_source, env=env, runtime_params=runtime_params

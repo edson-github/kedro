@@ -145,8 +145,7 @@ class SparkHiveDataSet(AbstractDataset[DataFrame, DataFrame]):
         then a `checkpoint` directory must be set, e.g. using
         `spark.sparkContext.setCheckpointDir("/path/to/dir")`
         """
-        _spark = SparkSession.builder.getOrCreate()
-        return _spark
+        return SparkSession.builder.getOrCreate()
 
     def _create_hive_table(self, data: DataFrame, mode: str = None):
         _mode: str = mode or self._write_mode

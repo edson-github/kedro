@@ -58,7 +58,7 @@ def get_cli_structure(
     """Convenience wrapper function for `_recurse_cli` to work within
     `click.Context` and return a `dict`.
     """
-    output: dict[str, Any] = dict()
+    output: dict[str, Any] = {}
     with click.Context(cli_obj) as ctx:  # type: ignore
         _recurse_cli(cli_obj, ctx, output, get_help)
     return output

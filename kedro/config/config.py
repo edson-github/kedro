@@ -101,7 +101,7 @@ class ConfigLoader(AbstractConfigLoader):
             "credentials": ["credentials*", "credentials*/**", "**/credentials*"],
             "logging": ["logging*", "logging*/**", "**/logging*"],
         }
-        self.config_patterns.update(config_patterns or {})
+        self.config_patterns |= (config_patterns or {})
 
         super().__init__(
             conf_source=conf_source,

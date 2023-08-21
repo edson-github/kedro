@@ -76,8 +76,7 @@ def _get_build_file_path() -> Path:
     return the file with the highest version number.
     """
     dist_path = Path(__file__).resolve().parent.parent / "dist"
-    whl_files = list(dist_path.glob("*.whl"))
-    whl_files.sort()
+    whl_files = sorted(dist_path.glob("*.whl"))
     try:
         return whl_files[-1]
     except IndexError:
