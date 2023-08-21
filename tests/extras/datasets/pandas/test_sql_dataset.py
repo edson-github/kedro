@@ -41,21 +41,21 @@ def sql_file(tmp_path: PosixPath):
 @pytest.fixture(params=[{}])
 def table_data_set(request):
     kwargs = {"table_name": TABLE_NAME, "credentials": {"con": CONNECTION}}
-    kwargs.update(request.param)
+    kwargs |= request.param
     return SQLTableDataSet(**kwargs)
 
 
 @pytest.fixture(params=[{}])
 def query_data_set(request):
     kwargs = {"sql": SQL_QUERY, "credentials": {"con": CONNECTION}}
-    kwargs.update(request.param)
+    kwargs |= request.param
     return SQLQueryDataSet(**kwargs)
 
 
 @pytest.fixture(params=[{}])
 def query_file_data_set(request, sql_file):
     kwargs = {"filepath": sql_file, "credentials": {"con": CONNECTION}}
-    kwargs.update(request.param)
+    kwargs |= request.param
     return SQLQueryDataSet(**kwargs)
 
 
@@ -122,7 +122,7 @@ class TestSQLTableDataSet:
             "SQLTableDataSet(load_args={}, save_args={'index': False}, "
             f"table_name={TABLE_NAME})" in str_repr
         )
-        assert CONNECTION not in str(str_repr)
+        assert CONNECTION not in str_repr
 
     def test_table_exists(self, mocker, table_data_set):
         """Test `exists` method invocation"""

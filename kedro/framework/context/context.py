@@ -44,11 +44,7 @@ def _is_relative_path(path_string: str) -> bool:
     if is_remote_path:
         return False
 
-    is_absolute_path = PurePosixPath(path_string).is_absolute()
-    if is_absolute_path:
-        return False
-
-    return True
+    return not (is_absolute_path := PurePosixPath(path_string).is_absolute())
 
 
 def _convert_paths_to_absolute_posix(

@@ -78,11 +78,7 @@ class AbstractRunner(ABC):
         # a pattern in the catalog
         registered_ds = [ds for ds in pipeline.data_sets() if ds in catalog]
 
-        # Check if there are any input datasets that aren't in the catalog and
-        # don't match a pattern in the catalog.
-        unsatisfied = pipeline.inputs() - set(registered_ds)
-
-        if unsatisfied:
+        if unsatisfied := pipeline.inputs() - set(registered_ds):
             raise ValueError(
                 f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
@@ -285,11 +281,10 @@ def _has_persistent_inputs(node: Node, catalog: DataCatalog) -> bool:
         are not ``MemoryDataset``, else False.
 
     """
-    for node_input in node.inputs:
-        # noqa: protected-access
-        if isinstance(catalog._data_sets[node_input], MemoryDataset):
-            return False
-    return True
+    return not any(
+        isinstance(catalog._data_sets[node_input], MemoryDataset)
+        for node_input in node.inputs
+    )
 
 
 def run_node(
@@ -364,7 +359,7 @@ def _collect_inputs_from_hook(  # noqa: too-many-arguments
                     f"'before_node_run' must return either None or a dictionary mapping "
                     f"dataset names to updated values, got '{response_type}' instead."
                 )
-            additional_inputs.update(response or {})
+            additional_inputs |= (response or {})
 
     return additional_inputs
 
@@ -421,7 +416,7 @@ def _run_node_sequential(
     additional_inputs = _collect_inputs_from_hook(
         node, catalog, inputs, is_async, hook_manager, session_id=session_id
     )
-    inputs.update(additional_inputs)
+    inputs |= additional_inputs
 
     outputs = _call_node_run(
         node, catalog, inputs, is_async, hook_manager, session_id=session_id

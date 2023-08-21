@@ -30,19 +30,21 @@ def mock_pipelines(mocker):
 
 @pytest.fixture
 def fake_catalog_config():
-    config = {
+    return {
         "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataSet",
             "filepath": "test.pq",
         },
-        "csv_{factory_pattern}": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
+        "csv_{factory_pattern}": {
+            "type": "pandas.CSVDataSet",
+            "filepath": "test.csv",
+        },
     }
-    return config
 
 
 @pytest.fixture
 def fake_catalog_with_overlapping_factories():
-    config = {
+    return {
         "an_example_dataset": {
             "type": "pandas.CSVDataSet",
             "filepath": "dummy_filepath",
@@ -64,24 +66,25 @@ def fake_catalog_with_overlapping_factories():
             "filepath": "dummy_filepath",
         },
     }
-    return config
 
 
 @pytest.fixture
 def fake_catalog_config_with_resolvable_dataset():
-    config = {
+    return {
         "parquet_{factory_pattern}": {
             "type": "pandas.ParquetDataSet",
             "filepath": "test.pq",
         },
-        "csv_{factory_pattern}": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
+        "csv_{factory_pattern}": {
+            "type": "pandas.CSVDataSet",
+            "filepath": "test.csv",
+        },
         "explicit_ds": {"type": "pandas.CSVDataSet", "filepath": "test.csv"},
         "{factory_pattern}_ds": {
             "type": "pandas.ParquetDataSet",
             "filepath": "test.pq",
         },
     }
-    return config
 
 
 @pytest.mark.usefixtures(

@@ -170,12 +170,10 @@ class KedroSession:
             "session_id": session.session_id,
         }
 
-        ctx = click.get_current_context(silent=True)
-        if ctx:
+        if ctx := click.get_current_context(silent=True):
             session_data["cli"] = _jsonify_cli_context(ctx)
 
-        env = env or os.getenv("KEDRO_ENV")
-        if env:
+        if env := env or os.getenv("KEDRO_ENV"):
             session_data["env"] = env
 
         if extra_params:

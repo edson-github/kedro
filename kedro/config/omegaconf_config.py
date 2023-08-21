@@ -112,7 +112,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
             "logging": ["logging*", "logging*/**", "**/logging*"],
             "globals": ["globals.yml"],
         }
-        self.config_patterns.update(config_patterns or {})
+        self.config_patterns |= (config_patterns or {})
 
         # Deactivate oc.env built-in resolver for OmegaConf
         OmegaConf.clear_resolver("oc.env")
@@ -190,9 +190,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         env_config = self.load_and_merge_dir_config(
             env_path, patterns, key, processed_files, read_environment_variables
         )
-        # Destructively merge the two env dirs. The chosen env will override base.
-        common_keys = config.keys() & env_config.keys()
-        if common_keys:
+        if common_keys := config.keys() & env_config.keys():
             sorted_keys = ", ".join(sorted(common_keys))
             msg = (
                 "Config from path '%s' will override the following "
@@ -253,7 +251,7 @@ class OmegaConfigLoader(AbstractConfigLoader):
         paths = [
             Path(each)
             for pattern in patterns
-            for each in self._fs.glob(Path(f"{str(conf_path)}/{pattern}").as_posix())
+            for each in self._fs.glob(Path(f"{conf_path}/{pattern}").as_posix())
         ]
         deduplicated_paths = set(paths)
         config_files_filtered = [
@@ -361,14 +359,12 @@ class OmegaConfigLoader(AbstractConfigLoader):
                 config2 = seen_files_to_keys[filepath2]
 
                 combined_keys = config1 & config2
-                overlapping_keys = {
+                if overlapping_keys := {
                     key for key in combined_keys if not key.startswith("_")
-                }
-
-                if overlapping_keys:
+                }:
                     sorted_keys = ", ".join(sorted(overlapping_keys))
                     if len(sorted_keys) > 100:  # noqa: PLR2004
-                        sorted_keys = sorted_keys[:100] + "..."
+                        sorted_keys = f"{sorted_keys[:100]}..."
                     duplicates.append(
                         f"Duplicate keys found in {filepath1} and {filepath2}: {sorted_keys}"
                     )

@@ -525,9 +525,7 @@ class TestBeforeNodeRunHookWithInputUpdates:
 
 def wait_and_identity(*args: Any):
     time.sleep(0.1)
-    if len(args) == 1:
-        return args[0]
-    return args
+    return args[0] if len(args) == 1 else args
 
 
 @pytest.fixture

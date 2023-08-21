@@ -14,7 +14,7 @@ for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:
     template_files.extend(
         [
             name.replace("kedro/", "", 1)
-            for name in glob("kedro/templates/" + pattern, recursive=True)
+            for name in glob(f"kedro/templates/{pattern}", recursive=True)
         ]
     )
 

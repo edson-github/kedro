@@ -240,9 +240,7 @@ def _pull_package(  # noqa: too-many-arguments
             )
         package_name = packages[0]
 
-        package_reqs = _get_all_library_reqs(library_meta)
-
-        if package_reqs:
+        if package_reqs := _get_all_library_reqs(library_meta):
             requirements_txt = metadata.source_dir / "requirements.txt"
             _append_package_reqs(requirements_txt, package_reqs, package_name)
 
@@ -921,13 +919,11 @@ def _get_package_artifacts(
     """From existing package, returns in order:
     source_path, tests_path, config_path
     """
-    artifacts = (
+    return (
         source_path / package_name,
         source_path / "tests",
-        # package_data (non-python files) needs to live inside one of the packages
         source_path / package_name / "config",
     )
-    return artifacts
 
 
 def _append_package_reqs(

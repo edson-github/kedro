@@ -153,8 +153,7 @@ def _starter_spec_to_dict(
     """Convert a dictionary of starters spec to a nicely formatted dictionary"""
     format_dict: dict[str, dict[str, str]] = {}
     for alias, spec in starter_specs.items():
-        format_dict[alias] = {}  # Each dictionary represent 1 starter
-        format_dict[alias]["template_path"] = spec.template_path
+        format_dict[alias] = {"template_path": spec.template_path}
         if spec.directory:
             format_dict[alias]["directory"] = spec.directory
     return format_dict
@@ -223,9 +222,7 @@ def new(config_path, starter_alias, checkout, directory, **kwargs):
 
     # Obtain config, either from a file or from interactive user prompts.
     if not prompts_required:
-        config = {}
-        if config_path:
-            config = _fetch_config_from_file(config_path)
+        config = _fetch_config_from_file(config_path) if config_path else {}
     elif config_path:
         config = _fetch_config_from_file(config_path)
         _validate_config_file(config, prompts_required)
@@ -286,7 +283,7 @@ def _fetch_config_from_file(config_path: str) -> dict[str, str]:
             config = yaml.safe_load(config_file)
 
         if KedroCliError.VERBOSE_ERROR:
-            click.echo(config_path + ":")
+            click.echo(f"{config_path}:")
             click.echo(yaml.dump(config, default_flow_style=False))
     except Exception as exc:
         raise KedroCliError(
@@ -463,9 +460,9 @@ def _fetch_config_from_user_prompts(
             cookiecutter_dict=config,
         )
 
-        # read the user's input for the variable
-        user_input = read_user_variable(str(prompt), cookiecutter_variable)
-        if user_input:
+        if user_input := read_user_variable(
+            str(prompt), cookiecutter_variable
+        ):
             prompt.validate(user_input)
             config[variable_name] = user_input
     return config
@@ -543,8 +540,7 @@ def _validate_config_file(config: dict[str, str], prompts: dict[str, Any]):
     """
     if config is None:
         raise KedroCliError("Config file is empty.")
-    missing_keys = set(prompts) - set(config)
-    if missing_keys:
+    if missing_keys := set(prompts) - set(config):
         click.echo(yaml.dump(config, default_flow_style=False))
         raise KedroCliError(f"{', '.join(missing_keys)} not found in config file.")
 

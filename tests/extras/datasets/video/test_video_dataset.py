@@ -136,7 +136,7 @@ class TestVideoDataSet:
         tmp_file = tmp_path / video_name
         mocked_s3_bucket.download_file(
             Bucket=S3_BUCKET_NAME,
-            Key=S3_KEY_PATH + "/" + video_name,
+            Key=f"{S3_KEY_PATH}/{video_name}",
             Filename=str(tmp_file),
         )
         reloaded_video = FileVideo(str(tmp_file))

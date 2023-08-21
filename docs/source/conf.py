@@ -30,7 +30,7 @@ project = "kedro"
 author = "kedro"
 
 # The short X.Y version.
-version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
+version = re.match(r"^([0-9]+\.[0-9]+).*", release)[1]
 
 
 # -- General configuration ---------------------------------------------------
@@ -373,12 +373,6 @@ def autolink_replacements(what: str) -> list[tuple[str, str, str]]:
     for module in KEDRO_MODULES:
         if what == "class":
             objects = get_classes(module)
-        elif what == "func":
-            objects = get_functions(module)
-
-        # Look for recognised class names/function names which are
-        # surrounded by double back-ticks
-        if what == "class":
             # first do plural only for classes
             replacements += [
                 (
@@ -388,6 +382,9 @@ def autolink_replacements(what: str) -> list[tuple[str, str, str]]:
                 )
                 for obj in objects
             ]
+
+        elif what == "func":
+            objects = get_functions(module)
 
         # singular
         replacements += [
@@ -472,9 +469,7 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):
     except Exception as e:
         print(
             style(
-                "Failed to check for class name mentions that can be "
-                "converted to reStructuredText links in docstring of {}. "
-                "Error is: \n{}".format(name, str(e)),
+                f"Failed to check for class name mentions that can be converted to reStructuredText links in docstring of {name}. Error is: \n{str(e)}",
                 fg="red",
             )
         )
@@ -536,9 +531,7 @@ try:
 except Exception as e:
     print(
         style(
-            "Failed to create list of (regex, reStructuredText link "
-            "replacement) for class names and method names in docstrings. "
-            "Error is: \n{}".format(str(e)),
+            f"Failed to create list of (regex, reStructuredText link replacement) for class names and method names in docstrings. Error is: \n{str(e)}",
             fg="red",
         )
     )

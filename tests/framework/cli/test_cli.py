@@ -68,8 +68,7 @@ def requirements_file(tmp_path):
 @fixture
 def fake_session(mocker):
     mock_session_create = mocker.patch.object(KedroSession, "create")
-    mocked_session = mock_session_create.return_value.__enter__.return_value
-    return mocked_session
+    return mock_session_create.return_value.__enter__.return_value
 
 
 class TestCliCommands:
@@ -256,7 +255,7 @@ class TestCliUtils:
         with raises(KedroCliError):
             get_pkg_version(requirements_file, "nonexistent")
         with raises(KedroCliError):
-            non_existent_file = str(requirements_file) + "-nonexistent"
+            non_existent_file = f"{str(requirements_file)}-nonexistent"
             get_pkg_version(non_existent_file, "pandas")
 
     def test_clean_pycache(self, tmp_path, mocker):
@@ -497,7 +496,7 @@ class TestRunCommand:
         nodes_input,
         nodes_expected,
     ):
-        nodes_command = "--nodes=" + nodes_input
+        nodes_command = f"--nodes={nodes_input}"
         result = CliRunner().invoke(
             fake_project_cli, ["run", nodes_command], obj=fake_metadata
         )
@@ -537,7 +536,7 @@ class TestRunCommand:
         tags_input,
         tags_expected,
     ):
-        tags_command = "--tags=" + tags_input
+        tags_command = f"--tags={tags_input}"
         result = CliRunner().invoke(
             fake_project_cli, ["run", tags_command], obj=fake_metadata
         )
@@ -946,8 +945,8 @@ class TestRunCommand:
     ):
         nodes_input = ["splitting_data", "training_model"]
         nodes_expected = ("splitting_data", "training_model")
-        node_command = "--node=" + nodes_input[0]
-        nodes_command = "--nodes=" + nodes_input[1]
+        node_command = f"--node={nodes_input[0]}"
+        nodes_command = f"--nodes={nodes_input[1]}"
         result = CliRunner().invoke(
             fake_project_cli, ["run", node_command, nodes_command], obj=fake_metadata
         )
@@ -975,8 +974,8 @@ class TestRunCommand:
     ):
         tags_input = ["tag1", "tag2"]
         tags_expected = ("tag1", "tag2")
-        tag_command = "--tag=" + tags_input[0]
-        tags_command = "--tags=" + tags_input[1]
+        tag_command = f"--tag={tags_input[0]}"
+        tags_command = f"--tags={tags_input[1]}"
         result = CliRunner().invoke(
             fake_project_cli, ["run", tag_command, tags_command], obj=fake_metadata
         )
@@ -1001,8 +1000,8 @@ class TestRunCommand:
         lv_input = ["dataset1:time1", "dataset2:time2"]
         lv_dict = {"dataset1": "time1", "dataset2": "time2"}
 
-        load_version_command = "--load-version=" + lv_input[0]
-        load_versions_command = "--load-versions=" + lv_input[1]
+        load_version_command = f"--load-version={lv_input[0]}"
+        load_versions_command = f"--load-versions={lv_input[1]}"
 
         result = CliRunner().invoke(
             fake_project_cli,

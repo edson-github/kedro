@@ -41,7 +41,7 @@ ENTRY_POINT_GROUPS = {
 logger = logging.getLogger(__name__)
 
 
-def call(cmd: list[str], **kwargs):  # pragma: no cover
+def call(cmd: list[str], **kwargs):    # pragma: no cover
     """Run a subprocess command and raise if it fails.
 
     Args:
@@ -52,9 +52,7 @@ def call(cmd: list[str], **kwargs):  # pragma: no cover
         click.exceptions.Exit: If `subprocess.run` returns non-zero code.
     """
     click.echo(" ".join(shlex.quote(c) for c in cmd))
-    # noqa: subprocess-run-check
-    code = subprocess.run(cmd, **kwargs).returncode
-    if code:
+    if code := subprocess.run(cmd, **kwargs).returncode:
         raise click.exceptions.Exit(code=code)
 
 
@@ -318,7 +316,7 @@ def split_node_names(ctx, param, to_split: str) -> list[str]:
     """
     result = []
     argument, match_state = "", 0
-    for char in to_split + ",":
+    for char in f"{to_split},":
         if char == "[":
             match_state += 1
         elif char == "]":
@@ -335,7 +333,7 @@ def split_node_names(ctx, param, to_split: str) -> list[str]:
 def env_option(func_=None, **kwargs):
     """Add `--env` CLI option to a function."""
     default_args = {"type": str, "default": None, "help": ENV_HELP}
-    kwargs = {**default_args, **kwargs}
+    kwargs = default_args | kwargs
     opt = click.option("--env", "-e", **kwargs)
     return opt(func_) if func_ else opt
 
@@ -395,13 +393,12 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
 
     entry_point_commands = []
     for entry_point in _get_entry_points(name):
-        loaded_entry_point = _safe_load_entry_point(entry_point)
-        if loaded_entry_point:
+        if loaded_entry_point := _safe_load_entry_point(entry_point):
             entry_point_commands.append(loaded_entry_point)
     return entry_point_commands
 
 
-def _config_file_callback(ctx, param, value):  # noqa: unused-argument
+def _config_file_callback(ctx, param, value):    # noqa: unused-argument
     """CLI callback that replaces command line options
     with values specified in a config file. If command line
     options are passed, they override config file values.
@@ -410,9 +407,9 @@ def _config_file_callback(ctx, param, value):  # noqa: unused-argument
     import anyconfig  # noqa: import-outside-toplevel
 
     ctx.default_map = ctx.default_map or {}
-    section = ctx.info_name
-
     if value:
+        section = ctx.info_name
+
         config = anyconfig.load(value)[section]
         ctx.default_map.update(config)
 
@@ -448,11 +445,7 @@ def _split_params(ctx, param, value):
     for item in split_string(ctx, param, value):
         equals_idx = item.find("=")
         colon_idx = item.find(":")
-        if equals_idx != -1 and colon_idx != -1 and equals_idx < colon_idx:
-            # For cases where key-value pair is separated by = and the value contains a colon
-            # which should not be replaced by =
-            pass
-        else:
+        if equals_idx == -1 or colon_idx == -1 or equals_idx >= colon_idx:
             item = item.replace(":", "=", 1)  # noqa: redefined-loop-name
         items = item.split("=", 1)
         if len(items) != 2:  # noqa: PLR2004
@@ -482,22 +475,22 @@ def _get_values_as_tuple(values: Iterable[str]) -> tuple[str, ...]:
 
 
 def _deprecate_options(ctx, param, value):
-    deprecated_flag = {
-        "node_names": "--node",
-        "tag": "--tag",
-        "load_version": "--load-version",
-    }
-    new_flag = {
-        "node_names": "--nodes",
-        "tag": "--tags",
-        "load_version": "--load-versions",
-    }
-    shorthand_flag = {
-        "node_names": "-n",
-        "tag": "-t",
-        "load_version": "-lv",
-    }
     if value:
+        deprecated_flag = {
+            "node_names": "--node",
+            "tag": "--tag",
+            "load_version": "--load-version",
+        }
+        new_flag = {
+            "node_names": "--nodes",
+            "tag": "--tags",
+            "load_version": "--load-versions",
+        }
+        shorthand_flag = {
+            "node_names": "-n",
+            "tag": "-t",
+            "load_version": "-lv",
+        }
         deprecation_message = (
             f"DeprecationWarning: 'kedro run' flag '{deprecated_flag[param.name]}' is deprecated "
             "and will not be available from Kedro 0.19.0. "

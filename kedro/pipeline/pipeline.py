@@ -184,9 +184,7 @@ class Pipeline:  # noqa: too-many-public-methods
         return Pipeline(set(self.nodes + other.nodes))
 
     def __radd__(self, other):
-        if isinstance(other, int) and other == 0:
-            return self
-        return self.__add__(other)
+        return self if isinstance(other, int) and other == 0 else self.__add__(other)
 
     def __sub__(self, other):
         if not isinstance(other, Pipeline):
@@ -378,8 +376,7 @@ class Pipeline:  # noqa: too-many-public-methods
             A new ``Pipeline``, containing only ``nodes``.
 
         """
-        unregistered_nodes = set(node_names) - set(self._nodes_by_name.keys())
-        if unregistered_nodes:
+        if unregistered_nodes := set(node_names) - set(self._nodes_by_name.keys()):
             # check if unregistered nodes are available under namespace
             namespaces = []
             for unregistered_node in unregistered_nodes:
@@ -415,16 +412,16 @@ class Pipeline:  # noqa: too-many-public-methods
         Returns:
             A new ``Pipeline`` containing nodes with the specified namespace.
         """
-        nodes = [
+        if nodes := [
             n
             for n in self.nodes
             if n.namespace and n.namespace.startswith(node_namespace)
-        ]
-        if not nodes:
+        ]:
+            return Pipeline(nodes)
+        else:
             raise ValueError(
                 f"Pipeline does not contain nodes with namespace '{node_namespace}'"
             )
-        return Pipeline(nodes)
 
     def _get_nodes_with_inputs_transcode_compatible(
         self, datasets: set[str]
@@ -441,10 +438,9 @@ class Pipeline:  # noqa: too-many-public-methods
         Returns:
             Set of ``Nodes`` that use the given datasets as inputs.
         """
-        missing = sorted(
+        if missing := sorted(
             datasets - self.data_sets() - self._transcode_compatible_names()
-        )
-        if missing:
+        ):
             raise ValueError(f"Pipeline does not contain data_sets named {missing}")
 
         relevant_nodes = set()
@@ -472,10 +468,9 @@ class Pipeline:  # noqa: too-many-public-methods
         Returns:
             Set of ``Nodes`` that output to the given datasets.
         """
-        missing = sorted(
+        if missing := sorted(
             datasets - self.data_sets() - self._transcode_compatible_names()
-        )
-        if missing:
+        ):
             raise ValueError(f"Pipeline does not contain data_sets named {missing}")
 
         relevant_nodes = set()
@@ -839,8 +834,9 @@ def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Node | Pipeline]):
 def _validate_unique_outputs(nodes: list[Node]) -> None:
     outputs = chain.from_iterable(node.outputs for node in nodes)
     outputs = map(_strip_transcoding, outputs)
-    duplicates = [key for key, value in Counter(outputs).items() if value > 1]
-    if duplicates:
+    if duplicates := [
+        key for key, value in Counter(outputs).items() if value > 1
+    ]:
         raise OutputNotUniqueError(
             f"Output(s) {sorted(duplicates)} are returned by more than one nodes. Node "
             f"outputs must be unique."
@@ -850,8 +846,9 @@ def _validate_unique_outputs(nodes: list[Node]) -> None:
 def _validate_unique_confirms(nodes: list[Node]) -> None:
     confirms = chain.from_iterable(node.confirms for node in nodes)
     confirms = map(_strip_transcoding, confirms)
-    duplicates = [key for key, value in Counter(confirms).items() if value > 1]
-    if duplicates:
+    if duplicates := [
+        key for key, value in Counter(confirms).items() if value > 1
+    ]:
         raise ConfirmNotUniqueError(
             f"{sorted(duplicates)} datasets are confirmed by more than one node. Node "
             f"confirms must be unique."
@@ -904,7 +901,7 @@ def _topologically_sorted(node_dependencies) -> list[list[Node]]:
         This method can be used to replace that message with
         one that refers to the nodes' string representations.
         """
-        circular = [str(node) for node in error_data.keys()]
+        circular = [str(node) for node in error_data]
         return f"Circular dependencies exist among these items: {circular}"
 
     try:

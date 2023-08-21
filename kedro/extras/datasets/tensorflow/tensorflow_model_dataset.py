@@ -140,9 +140,7 @@ class TensorFlowModelDataset(AbstractVersionedDataset[tf.keras.Model, tf.keras.M
             else:
                 self._fs.get(load_path, path, recursive=True)
 
-            # Pass the local temporary directory/file path to keras.load_model
-            device_name = self._load_args.pop("tf_device", None)
-            if device_name:
+            if device_name := self._load_args.pop("tf_device", None):
                 with tf.device(device_name):
                     model = tf.keras.models.load_model(path, **self._load_args)
             else:

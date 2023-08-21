@@ -32,7 +32,7 @@ def ipython():
 
 @pytest.fixture(autouse=True)
 def fake_metadata(tmp_path):
-    metadata = ProjectMetadata(
+    return ProjectMetadata(
         source_dir=tmp_path / "src",  # default
         config_file=tmp_path / "pyproject.toml",
         package_name=PACKAGE_NAME,
@@ -41,7 +41,6 @@ def fake_metadata(tmp_path):
         kedro_init_version=PROJECT_VERSION,
         project_path=tmp_path,
     )
-    return metadata
 
 
 @pytest.fixture(autouse=True)
@@ -269,8 +268,7 @@ class TestProjectPathResolution:
     def test_project_path_unresolvable(self, mocker):
         mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
         result = _resolve_project_path()
-        expected = None
-        assert result == expected
+        assert result is None
 
     def test_project_path_unresolvable_warning(self, mocker, caplog, ipython):
         mocker.patch("kedro.ipython._find_kedro_project", return_value=None)
